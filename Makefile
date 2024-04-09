@@ -14,6 +14,12 @@ run: build
 build: 
 	dotnet publish $(SRC_DIR)/$(APP_NAME).csproj  -c Release /p:DebugType=None -o .
 
+test: buildTests
+	dotnet test $(TEST_DIR)/$(APP_NAME).Tests.csproj
+
+buildTests:
+	dotnet build -c Debug /p:DebugType=None $(TEST_DIR)/$(APP_NAME).Tests.csproj
+
 help: build
 	./$(APP_NAME) -h
 
