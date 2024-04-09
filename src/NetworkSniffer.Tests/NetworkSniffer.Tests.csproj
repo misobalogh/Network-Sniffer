@@ -19,5 +19,13 @@
     <ItemGroup>
         <Using Include="Xunit"/>
     </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\NetworkSniffer\NetworkSniffer.csproj" />
+    </ItemGroup>
 
 </Project>

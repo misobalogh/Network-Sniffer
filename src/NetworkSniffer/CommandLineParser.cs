@@ -17,11 +17,6 @@ public class CommandLineParser
         parser.ParseArguments<Options>(args)
             .WithParsed(o =>
             {
-                if (o.Help)
-                {
-                    Console.WriteLine("Help message");
-                    ExitHandler.ExitSuccess();
-                }
                 options = o;
             })
             .WithNotParsed(errors =>
@@ -35,7 +30,7 @@ public class CommandLineParser
                     }
                     ExitHandler.Warn(error.ToString());
                 }
-                ExitHandler.ExitFailure("Error while parsing command line arguments. Exiting.");
+                throw new ArgumentException("Invalid arguments");
             });
 
         return options;
