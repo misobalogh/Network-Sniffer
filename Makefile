@@ -8,18 +8,22 @@ OBJ = obj
 
 all: build
 
+run: build
+	./$(APP_NAME)
+
 build: 
-	dotnet publish -c Release /p:DebugType=None -o .
+	dotnet publish $(SRC_DIR)/$(APP_NAME).csproj  -c Release /p:DebugType=None -o .
 
 help: build
 	./$(APP_NAME) -h
 
 restore:
 	dotnet nuget locals all --clear
-	dotnet restore --verbosity diagnostic
+	dotnet restore $(SRC_DIR).sln  --verbosity diagnostic
 
 clear:
 	dotnet nuget locals all --clear
 
 clean:
-	dotnet clean
+	dotnet clean $(SRC_DIR)/$(APP_NAME).csproj
+	rm -rf $(APP_NAME)
