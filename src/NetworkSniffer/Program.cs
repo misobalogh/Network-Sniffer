@@ -1,9 +1,14 @@
 ﻿namespace NetworkSniffer;
 
-class Program
+public static class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        var parser = new CommandLineParser();
+       
+        var options = parser.Parse(args);
+        
+        var sniffer = new Sniffer(options);
+        
     }
 }
