@@ -16,5 +16,9 @@
         <PackageReference Include="CommandLineParser" Version="2.8.0" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="SharpPcap" Version="6.3.0" />
+    </ItemGroup>
+
 
 </Project>

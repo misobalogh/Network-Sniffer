@@ -9,11 +9,11 @@ public static class Program
         var options = parser.Parse(args);
         if ((options.Help && args.Length == 1) || args.Length == 0)
         {
-            Console.WriteLine("Help message");
+            Console.Error.WriteLine("Help message");
             ExitHandler.ExitSuccess();
         }
         
-        var sniffer = new Sniffer(options);
-        
+        var sniffer = new PacketCapture(options);
+        sniffer.Start();
     }
 }
