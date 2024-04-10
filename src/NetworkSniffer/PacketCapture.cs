@@ -1,4 +1,5 @@
 using System;
+using NetworkSniffer.Enums;
 using SharpPcap;
 using SharpPcap.LibPcap;
 
@@ -7,36 +8,48 @@ namespace NetworkSniffer;
 public class PacketCapture
 {
     private readonly Options _options;
-    private bool _exit = false;
     private readonly ICaptureDevice _device = null!;
+    private const int ReadTimeoutMilliseconds = 1000;
 
     public PacketCapture(Options options)
     {
         _options = options;
         if (string.IsNullOrEmpty(options.Interface))
         {
-            var devices = CaptureDeviceList.Instance;
-            Console.WriteLine("Active interfaces:");
-            foreach (var dev in devices)
-                Console.WriteLine($"\t{dev.Name}");
-            ExitHandler.ExitSuccess();
+            ListAllActiveInterfaces();
         }
         else
         {
             using var device = GetDevice(options.Interface);
             if (device == null)
             {
-                Console.WriteLine($"Interface '{options.Interface}' not found.");
-                ExitHandler.ExitFailure();
+                ExitHandler.ExitFailure($"Interface '{options.Interface}' not found.", ExitCode.NoActiveInterfaces);
             }
             else
             {
                 _device = device;
+                Console.WriteLine($"Sniffing on interface {options.Interface}");
             }
-                
-            Console.WriteLine($"Sniffing on interface {options.Interface}");
+            Console.CancelKeyPress += OnCancelKeyPress;
+            
+            Console.WriteLine(Filter.Create(options));
+        }
+    }
+
+    private static void ListAllActiveInterfaces()
+    {
+        if (CaptureDeviceList.Instance.Count < 1)
+        {
+            ExitHandler.ExitFailure("Error: No active interfaces found.", ExitCode.NoActiveInterfaces);
         }
         
+        var devices = CaptureDeviceList.Instance;
+        Console.WriteLine("Active interfaces:");
+        foreach (var device in devices)
+        {
+            Console.WriteLine($"\t{device.Name}");
+        }
+        ExitHandler.ExitSuccess();
     }
 
     private ICaptureDevice? GetDevice(string name)
@@ -51,38 +64,53 @@ public class PacketCapture
         return null;
     }
 
-    public void Start()
+    public void StartCapturing()
     {
-        Console.CancelKeyPress += OnCancelKeyPress;
-        
         _device.OnPacketArrival += OnPacketArrival;
 
-        int readTimeoutMilliseconds = 1000;
-        _device.Open(DeviceModes.Promiscuous, readTimeoutMilliseconds);
+        _device.Open(DeviceModes.Promiscuous, ReadTimeoutMilliseconds);
 
-        _device.StartCapture();
-        
-        while (!_exit)
-        {
-            // Console.WriteLine("Sniffing...");
-        }
+        _device.Capture();
     }
 
     private void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     {
         // Clean up
-        _device.StopCapture();
         Console.WriteLine("Exiting...");
+        Cleanup();
         ExitHandler.ExitSuccess();
     }
     
     private void OnPacketArrival(object sender, SharpPcap.PacketCapture e)
     {
-        var time = e.Header.Timeval.Date;
-        var len = e.Data.Length;
+        var time = GetTime();
+        
         var rawPacket = e.GetPacket();
-        Console.WriteLine("{0}:{1}:{2},{3} Len={4}",
-            time.Hour, time.Minute, time.Second, time.Millisecond, len);
-        Console.WriteLine(rawPacket.ToString());
+        
+        PacketData parsedPacket = PacketParser.Parse(rawPacket);
+        parsedPacket.Timestamp = time;
+        
+        
+        
+        OutputFomater.Output(parsedPacket);
+        
+        if (--_options.PacketCount == 0)
+        {
+            Console.WriteLine("Packet count reached. Exiting...");
+            Cleanup();
+            ExitHandler.ExitSuccess();
+        }
+    }
+
+    private string GetTime()
+    {
+        DateTimeOffset localTimeWithOffset = DateTimeOffset.Now;
+        string formattedTime = localTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
+        return formattedTime;
+    }
+    
+    private void Cleanup()
+    {
+        _device.Close();
     }
 }

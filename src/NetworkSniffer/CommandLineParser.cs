@@ -1,5 +1,6 @@
 using System;
 using CommandLine;
+using NetworkSniffer.Enums;
 
 namespace NetworkSniffer;
 
