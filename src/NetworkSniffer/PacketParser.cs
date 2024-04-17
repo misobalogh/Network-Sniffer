@@ -2,41 +2,65 @@ using PacketDotNet;
 using NetworkSniffer.Enums;
 using SharpPcap;
 
-namespace NetworkSniffer;
-
-public static class PacketParser
+namespace NetworkSniffer
 {
-    public static PacketData Parse(RawCapture rawCapture)
+    public static class PacketParser
     {
-        try
+        public static PacketData? Parse(RawCapture rawCapture)
         {
-            Packet packet = Packet.ParsePacket(LinkLayers.Ethernet, rawCapture.Data);
-            
-            var ipPacket = packet.Extract<IPPacket>();
-            if (ipPacket != null)
+            try
             {
-                return new PacketData(
-                    ipPacket.DestinationAddress.ToString(),
-                    ipPacket.SourceAddress.ToString(),
-                    ipPacket.Protocol.ToString(),
-                    rawCapture.Data.Length.ToString(),
-                    ipPacket.SourceAddress.ToString(),
-                    ipPacket.DestinationAddress.ToString(),
-                    "N/A",
-                    "N/A",
-                    packet.Bytes
-                );
+                Packet packet = Packet.ParsePacket(LinkLayers.Ethernet, rawCapture.Data);
+
+                var ethernetPacket = packet.Extract<EthernetPacket>();
+                
+                var ipPacket = packet.Extract<IPPacket>();
+                
+                if (packet.PayloadPacket is ArpPacket arpPacket)
+                {
+                    return new PacketData(
+                        ethernetPacket?.DestinationHardwareAddress?.ToString(), 
+                        ethernetPacket?.SourceHardwareAddress?.ToString(), 
+                        "Arp",
+                        rawCapture.Data.Length.ToString(),
+                        packet.Bytes,
+                        arpPacket.SenderProtocolAddress,
+                        arpPacket.TargetProtocolAddress
+                    );
+                }
+                else if (ipPacket != null)
+                {
+                    var packetToReturn = new PacketData(
+                        ethernetPacket?.SourceHardwareAddress?.ToString(), 
+                        ethernetPacket?.DestinationHardwareAddress?.ToString(), 
+                        ipPacket.Protocol.ToString(),
+                        rawCapture.Data.Length.ToString(),
+                        packet.Bytes,
+                        ipPacket.SourceAddress,
+                        ipPacket.DestinationAddress
+                    );
+                    if (ipPacket.PayloadPacket is TcpPacket tcpPacket)
+                    {
+                        packetToReturn.DstPort = tcpPacket.DestinationPort;
+                        packetToReturn.SrcPort = tcpPacket.SourcePort;
+                    }
+                    else if (ipPacket.PayloadPacket is UdpPacket udpPacket)
+                    {
+                        packetToReturn.DstPort = udpPacket.DestinationPort;
+                        packetToReturn.SrcPort = udpPacket.SourcePort;
+                    }
+
+                    return packetToReturn;
+                }
+
+               
+                return null;
             }
-            else
+            catch (Exception ex)
             {
-                return new PacketData("Unknown", "Unknown", "Unknown", packet.Bytes.Length.ToString(), "Unknown", "Unknown", "N/A", "N/A", packet.Bytes);
+                ExitHandler.ExitFailure($"Error parsing packet {ex.Message}", ExitCode.PacketParseError);
             }
+            throw new InvalidOperationException();
         }
-        catch (Exception ex)
-        {
-            ExitHandler.ExitFailure($"Error parsing packet {ex.Message}", ExitCode.PacketParseError);
-        }
-        throw new InvalidOperationException();
     }
 }
-

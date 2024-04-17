@@ -1,5 +1,6 @@
 using System;
 using NetworkSniffer.Enums;
+using PacketDotNet;
 using SharpPcap;
 using SharpPcap.LibPcap;
 
@@ -87,13 +88,18 @@ public class PacketCapture
         
         var rawPacket = e.GetPacket();
         
-        PacketData parsedPacket = PacketParser.Parse(rawPacket);
-        parsedPacket.Timestamp = time;
-        
-        
-        
-        OutputFomater.Output(parsedPacket);
-        
+
+        PacketData? parsedPacket = PacketParser.Parse(rawPacket);
+        if (parsedPacket == null)
+        {
+            ExitHandler.ExitFailure("Error parsing while packet");
+        }
+        else
+        {
+            parsedPacket.Timestamp = time;
+            OutputFomater.Output(parsedPacket);
+        }
+
         if (--_options.PacketCount == 0)
         {
             Console.WriteLine("Packet count reached. Exiting...");

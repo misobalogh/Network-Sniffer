@@ -13,8 +13,14 @@ public static class OutputFomater
         Console.WriteLine($"frame length: {packetData.FrameLength}");
         Console.WriteLine($"src IP: {packetData.SrcIP}");
         Console.WriteLine($"dst IP: {packetData.DstIP}");
-        Console.WriteLine($"src port: {packetData.SrcPort}");
-        Console.WriteLine($"dst port: {packetData.DstPort}");
+        if (packetData.SrcPort != null)
+        {
+            Console.WriteLine($"src port: {packetData.SrcPort}");
+        }
+        if (packetData.DstPort != null)
+        {
+            Console.WriteLine($"dst port: {packetData.DstPort}");
+        }
         Console.WriteLine($"Protocol: {packetData.Protocol}");
         Console.WriteLine();
         
