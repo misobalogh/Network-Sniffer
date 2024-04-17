@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 
 namespace NetworkSniffer;
 
@@ -6,8 +7,8 @@ public class PacketData
 {
     public PacketData(string? dstMac, string? srcMac, string protocol, string frameLength,  byte[] byteOffset, IPAddress? srcIp = null, IPAddress? dstIp = null, ushort? srcPort = null, ushort? dstPort = null)
     {
-        SrcMac = ParseMac(srcMac);
-        DstMac = ParseMac(dstMac);
+        SrcMac = FormatMac(srcMac);
+        DstMac = FormatMac(dstMac);
         Protocol = protocol;
         FrameLength = frameLength;
         SrcIP = srcIp?.ToString();
@@ -17,21 +18,27 @@ public class PacketData
         ByteOffset = byteOffset;
     }
 
-    private string? ParseMac(string? macAddress)
+    private string? FormatMac(string? macAddress)
     {
         if (string.IsNullOrEmpty(macAddress))
         {
             return null;
         }
+        
         if (macAddress.Length != 12)
         {
-            throw new ArgumentException("Invalid MAC address format", nameof(macAddress));
+            throw new ArgumentException("Invalid MAC address format", macAddress);
         }
 
-        var formattedMac = string.Join(":", Enumerable.Range(0, 6)
-            .Select(i => macAddress.Substring(i * 2, 2)));
+        var formattedMac = new StringBuilder();
+        for (int i = 0; i < macAddress.Length; i += 2)
+        {
+            formattedMac.Append(macAddress.Substring(i, 2));
+            formattedMac.Append(":");
+        }
 
-        return formattedMac;
+        formattedMac.Remove(formattedMac.Length - 1, 1);
+        return formattedMac.ToString();
     }
 
 
