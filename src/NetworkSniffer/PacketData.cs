@@ -5,7 +5,7 @@ namespace NetworkSniffer;
 
 public class PacketData
 {
-    public PacketData(string? dstMac, string? srcMac, string protocol, string frameLength,  byte[] byteOffset, IPAddress? srcIp = null, IPAddress? dstIp = null, ushort? srcPort = null, ushort? dstPort = null)
+    public PacketData(string? srcMac, string? dstMac, string protocol, string frameLength,  byte[] byteOffset, IPAddress? srcIp = null, IPAddress? dstIp = null, ushort? srcPort = null, ushort? dstPort = null)
     {
         SrcMac = FormatMac(srcMac);
         DstMac = FormatMac(dstMac);

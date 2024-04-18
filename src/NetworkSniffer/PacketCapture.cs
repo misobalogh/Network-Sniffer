@@ -71,6 +71,7 @@ public class PacketCapture
 
         _device.Open(DeviceModes.Promiscuous, ReadTimeoutMilliseconds);
 
+        _device.Filter = Filter.Create(_options);
         _device.Capture();
     }
 
@@ -89,16 +90,14 @@ public class PacketCapture
         var rawPacket = e.GetPacket();
         
 
-        PacketData? parsedPacket = PacketParser.Parse(rawPacket);
+        PacketData? parsedPacket = PacketParser.Parse(rawPacket, _options);
         if (parsedPacket == null)
         {
-            ExitHandler.ExitFailure("Error parsing while packet");
+            return;
         }
-        else
-        {
-            parsedPacket.Timestamp = time;
-            OutputFomater.Output(parsedPacket);
-        }
+
+        parsedPacket.Timestamp = time;
+        OutputFomater.Output(parsedPacket);
 
         if (--_options.PacketCount == 0)
         {
