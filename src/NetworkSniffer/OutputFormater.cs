@@ -30,7 +30,7 @@ public static class OutputFormater
             int lengthCurrentLine = Math.Min(16, packetData.ByteOffset.Length - i);
             
             // beginning of the line
-            string byteOffset = $"0x{i:X4}: ";
+            string byteOffset = $"0x{i:X4}: ".ToLower();
             
             string byteOffsetHexa = BitConverter.ToString(packetData.ByteOffset, i, lengthCurrentLine).Replace('-', ' ').ToLower();
 
