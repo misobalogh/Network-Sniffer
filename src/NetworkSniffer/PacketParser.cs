@@ -30,23 +30,30 @@ namespace NetworkSniffer
                 }
                 else if (ipPacket != null)
                 {
+                    string? protocolType = null;
                     if (ipPacket is IPv6Packet { PayloadPacket: IcmpV6Packet icmpV6Packet } ipv6Packet)
                     {
-                        Console.WriteLine(icmpV6Packet.Type);
-                        string protocolType;
                         switch (icmpV6Packet.Type)
                         {
                             case IcmpV6Type.EchoReply:
+                                if (options.Icmp6 == false)
+                                {
+                                    return null;
+                                }
                                 protocolType = "ICMPv6 echo response";
                                 break;
                             case IcmpV6Type.EchoRequest:
                                 protocolType = "ICMPv6 echo request";
+                                if (options.Icmp6 == false)
+                                {
+                                    return null;
+                                }
                                 break;
                             case IcmpV6Type.RouterSolicitation:
                             case IcmpV6Type.RouterAdvertisement:
                             case IcmpV6Type.NeighborSolicitation:
                             case IcmpV6Type.NeighborAdvertisement:
-                                if (!options.Ndp && (options.Mld || options.Icmp6))
+                                if (options is { Mld: true, Ndp: false, Icmp6: false })
                                 {
                                     return null;
                                 }
@@ -56,7 +63,7 @@ namespace NetworkSniffer
                             case IcmpV6Type.MulticastListenerQuery:
                             case IcmpV6Type.MulticastListenerReport:
                             case IcmpV6Type.Version2MulticastListenerReport:
-                                if (!options.Mld && (options.Ndp || options.Icmp6))
+                                if (options is { Mld: false, Ndp: true, Icmp6: false})
                                 {
                                     return null;
                                 }
@@ -65,20 +72,12 @@ namespace NetworkSniffer
                             default:
                                 return null;
                         }
-                        return new PacketData(
-                            ethernetPacket?.SourceHardwareAddress?.ToString(),
-                            ethernetPacket?.DestinationHardwareAddress?.ToString(),
-                            protocolType,
-                            rawCapture.Data.Length.ToString(),
-                            packet.Bytes,
-                            ipv6Packet.SourceAddress,
-                            ipv6Packet.DestinationAddress
-                        );
+                        
                     }
                     var packetToReturn = new PacketData(
                         ethernetPacket?.SourceHardwareAddress?.ToString(), 
                         ethernetPacket?.DestinationHardwareAddress?.ToString(), 
-                        ipPacket.Protocol.ToString(),
+                        protocolType ?? ipPacket.Protocol.ToString(),
                         rawCapture.Data.Length.ToString(),
                         packet.Bytes,
                         ipPacket.SourceAddress,

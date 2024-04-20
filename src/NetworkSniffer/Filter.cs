@@ -52,6 +52,7 @@ public static class Filter
 
         stringToAppend.Append(name + " ");
         
+        _needConjunction = true;
         return stringToAppend.ToString();
     }
 }
