@@ -29,8 +29,9 @@ public static class Filter
 
         if (options.Tcp || options.Udp)
         {
-            if (options.PortDestination != 0) filter.Append($"port {options.PortDestination} ");
-            if (options.PortSource != 0) filter.Append($"port {options.PortSource} ");
+            if (options.PortDestination != null) filter.Append($"port {options.PortDestination} ");
+            else if (options.PortSource != null) filter.Append($"port {options.PortSource} ");
+            else if (options.Port != null) filter.Append($"port {options.Port}");
         }
 
         

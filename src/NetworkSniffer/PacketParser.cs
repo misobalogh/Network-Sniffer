@@ -88,11 +88,21 @@ namespace NetworkSniffer
                     {
                         packetToReturn.DstPort = tcpPacket.DestinationPort;
                         packetToReturn.SrcPort = tcpPacket.SourcePort;
+                        if ((options.PortSource != null && options.PortSource != tcpPacket.SourcePort)
+                            || (options.PortDestination != null && options.PortDestination != tcpPacket.DestinationPort))
+                        {
+                            return null;
+                        }
                     }
                     else if (ipPacket.PayloadPacket is UdpPacket udpPacket)
                     {
                         packetToReturn.DstPort = udpPacket.DestinationPort;
                         packetToReturn.SrcPort = udpPacket.SourcePort;
+                        if ((options.PortSource != null && options.PortSource != udpPacket.SourcePort)
+                            || (options.PortDestination != null && options.PortDestination != udpPacket.DestinationPort))
+                        {
+                            return null;
+                        }
                     }
 
                     return packetToReturn;

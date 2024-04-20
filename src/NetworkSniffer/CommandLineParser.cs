@@ -50,11 +50,14 @@ public class Options
     [Option('u', "udp", HelpText = "Display UDP datagrams.")]
     public bool Udp { get; set; }
 
-    [Option('p', "port-source", HelpText = "Filter TCP/UDP based on source port number.")]
-    public ushort PortSource { get; set; }
+    [Option('p', HelpText = "Filter TCP/UDP based on port number")]
+    public ushort? Port { get; set; }
+
+    [Option("port-source", HelpText = "Filter TCP/UDP based on source port number.")]
+    public ushort? PortSource { get; set; }
 
     [Option("port-destination", HelpText = "Filter TCP/UDP based on destination port number.")]
-    public ushort PortDestination { get; set; }
+    public ushort? PortDestination { get; set; }
 
     [Option('n', "num", HelpText = "Number of packets to display.")]
     public uint PacketCount { get; set; } = 1;

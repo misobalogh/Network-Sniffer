@@ -38,7 +38,7 @@ public class PacketData
         }
 
         formattedMac.Remove(formattedMac.Length - 1, 1);
-        return formattedMac.ToString();
+        return formattedMac.ToString().ToLower();
     }
 
 

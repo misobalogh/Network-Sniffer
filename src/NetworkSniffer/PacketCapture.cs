@@ -29,11 +29,8 @@ public class PacketCapture
             else
             {
                 _device = device;
-                Console.WriteLine($"Sniffing on interface {options.Interface}");
             }
             Console.CancelKeyPress += OnCancelKeyPress;
-            
-            Console.WriteLine(Filter.Create(options));
         }
     }
 
@@ -97,7 +94,7 @@ public class PacketCapture
         }
 
         parsedPacket.Timestamp = time;
-        OutputFomater.Output(parsedPacket);
+        OutputFormater.Output(parsedPacket);
 
         if (--_options.PacketCount == 0)
         {
