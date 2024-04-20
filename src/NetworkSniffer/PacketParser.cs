@@ -13,16 +13,20 @@ namespace NetworkSniffer
                 Packet packet = Packet.ParsePacket(LinkLayers.Ethernet, rawCapture.Data);
 
                 var ethernetPacket = packet.Extract<EthernetPacket>();
+                if (ethernetPacket == null)
+                {
+                    return null;
+                }
                 
                 var ipPacket = packet.Extract<IPPacket>();
                 
                 if (packet.PayloadPacket is ArpPacket arpPacket)
                 {
                     return new PacketData(
-                        ethernetPacket?.SourceHardwareAddress?.ToString(), 
-                        ethernetPacket?.DestinationHardwareAddress?.ToString(), 
+                        ethernetPacket.SourceHardwareAddress.ToString(),
+                        ethernetPacket.DestinationHardwareAddress.ToString(),
                         "Arp",
-                        rawCapture.Data.Length.ToString(),
+                        ethernetPacket.TotalPacketLength.ToString(),
                         packet.Bytes,
                         arpPacket.SenderProtocolAddress,
                         arpPacket.TargetProtocolAddress
@@ -31,7 +35,7 @@ namespace NetworkSniffer
                 else if (ipPacket != null)
                 {
                     string? protocolType = null;
-                    if (ipPacket is IPv6Packet { PayloadPacket: IcmpV6Packet icmpV6Packet } ipv6Packet)
+                    if (ipPacket is IPv6Packet { PayloadPacket: IcmpV6Packet icmpV6Packet })
                     {
                         switch (icmpV6Packet.Type)
                         {
@@ -75,10 +79,10 @@ namespace NetworkSniffer
                         
                     }
                     var packetToReturn = new PacketData(
-                        ethernetPacket?.SourceHardwareAddress?.ToString(), 
-                        ethernetPacket?.DestinationHardwareAddress?.ToString(), 
+                        ethernetPacket.SourceHardwareAddress?.ToString(), 
+                        ethernetPacket.DestinationHardwareAddress?.ToString(), 
                         protocolType ?? ipPacket.Protocol.ToString(),
-                        rawCapture.Data.Length.ToString(),
+                        ethernetPacket.TotalPacketLength.ToString(),
                         packet.Bytes,
                         ipPacket.SourceAddress,
                         ipPacket.DestinationAddress
@@ -87,21 +91,11 @@ namespace NetworkSniffer
                     {
                         packetToReturn.DstPort = tcpPacket.DestinationPort;
                         packetToReturn.SrcPort = tcpPacket.SourcePort;
-                        if ((options.PortSource != null && options.PortSource != tcpPacket.SourcePort)
-                            || (options.PortDestination != null && options.PortDestination != tcpPacket.DestinationPort))
-                        {
-                            return null;
-                        }
                     }
                     else if (ipPacket.PayloadPacket is UdpPacket udpPacket)
                     {
                         packetToReturn.DstPort = udpPacket.DestinationPort;
                         packetToReturn.SrcPort = udpPacket.SourcePort;
-                        if ((options.PortSource != null && options.PortSource != udpPacket.SourcePort)
-                            || (options.PortDestination != null && options.PortDestination != udpPacket.DestinationPort))
-                        {
-                            return null;
-                        }
                     }
 
                     return packetToReturn;

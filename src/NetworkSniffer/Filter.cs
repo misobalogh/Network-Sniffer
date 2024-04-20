@@ -4,34 +4,33 @@ namespace NetworkSniffer;
 
 public static class Filter
 {
-    private static bool _needConjunction = false;
+    private static bool _needConjunction = true;
 
     public static string Create(Options options)
     {
         var filter = new StringBuilder();
-        if (options.Tcp)
+        if (options is { Tcp: true, Udp: true })
+        {
+            filter.Append("(tcp or udp) ");
+        }
+        else if (options.Tcp)
         {
             filter.Append("tcp ");
-            _needConjunction = true;
-
         }
-
-        if (options.Udp)
+        else if (options.Udp)
         {
-            if (options.Tcp)
-            {
-                filter.Append("or ");
-            }
-
             filter.Append("udp ");
-            _needConjunction = true;
+        }
+        else
+        {
+            _needConjunction = false;
         }
 
         if (options.Tcp || options.Udp)
         {
-            if (options.PortDestination != null) filter.Append($"port {options.PortDestination} ");
-            else if (options.PortSource != null) filter.Append($"port {options.PortSource} ");
-            else if (options.Port != null) filter.Append($"port {options.Port}");
+            if (options.PortDestination != null) filter.Append($"and dst port {options.PortDestination} ");
+            else if (options.PortSource != null) filter.Append($"and src port {options.PortSource} ");
+            else if (options.Port != null) filter.Append($"and port {options.Port}");
         }
 
         
