@@ -17,7 +17,7 @@ public class CommandLineParserTests
         Assert.Equal("eth0", options.Interface);
         Assert.True(options.Tcp);
         Assert.True(options.Udp);
-        Assert.Equal((ushort)8080, options.PortSource);
+        Assert.Equal((ushort)8080, options.Port);
         Assert.Equal(10u, options.PacketCount);
     }
 
@@ -122,14 +122,13 @@ public class CommandLineParserTests
     {
         // Arrange
         var parser = new CommandLineParser();
-        string[] args = ["-i", "eth0", "-p", "8080", "--port-destination", "9090"];
+        string[] args = ["-i", "eth0", "--port-destination", "9090"];
 
         // Act
         var options = parser.Parse(args);
 
         // Assert
         Assert.Equal("eth0", options.Interface);
-        Assert.Equal((ushort)8080, options.PortSource);
         Assert.Equal((ushort)9090, options.PortDestination);
     }
     
