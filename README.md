@@ -5,8 +5,14 @@ Variant ZETA - Network Sniffer
 This project's assignment was to create network sniffer, that would be able to capture packets that suit specified filter on specified interface.
 
 ## 1. Table of contents
-
-
+- [Implementation of network sniffer](#implementation-of-network-sniffer)
+    * [1. Table of contents](#1-table-of-contents)
+    * [2. How to run it](#2-how-to-run-it)
+        - [Makefile targets:](#makefile-targets-)
+    * [3. Basic theory for understanding the program](#3-basic-theory-for-understanding-the-program)
+    * [4. Program structure](#4-program-structure)
+    * [5. Testing](#5-testing)
+    * [6. Bibliography](#6-bibliography)
 
 ## 2. How to run it
 The project can be build with prepared [Makefile](Makefile). The default Makefile target will create executable file `./ipk-sniffer` that can be started from command line as shown below:\
