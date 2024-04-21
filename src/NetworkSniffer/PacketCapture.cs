@@ -1,8 +1,5 @@
-using System;
 using NetworkSniffer.Enums;
-using PacketDotNet;
 using SharpPcap;
-using SharpPcap.LibPcap;
 
 namespace NetworkSniffer;
 
