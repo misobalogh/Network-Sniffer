@@ -1,24 +1,27 @@
+// Michal Balogh, xbalog06
+// FIT VUT
+// 2024
+
 using System.Net;
 using System.Text;
 
 namespace NetworkSniffer;
 
-public class PacketData
+// Class for storing data from packets
+public class PacketData(
+    string? srcMac,
+    string? dstMac,
+    string protocol,
+    string frameLength,
+    byte[] byteOffset,
+    IPAddress? srcIp = null,
+    IPAddress? dstIp = null,
+    ushort? srcPort = null,
+    ushort? dstPort = null)
 {
-    public PacketData(string? srcMac, string? dstMac, string protocol, string frameLength,  byte[] byteOffset, IPAddress? srcIp = null, IPAddress? dstIp = null, ushort? srcPort = null, ushort? dstPort = null)
-    {
-        SrcMac = FormatMac(srcMac);
-        DstMac = FormatMac(dstMac);
-        Protocol = protocol;
-        FrameLength = frameLength;
-        SrcIP = srcIp?.ToString();
-        DstIP = dstIp?.ToString();
-        SrcPort = srcPort;
-        DstPort = dstPort;
-        ByteOffset = byteOffset;
-    }
-
-    private string? FormatMac(string? macAddress)
+    // Method for formatting MAC address in following format:
+    //  00:00:00:00:00:00
+    private static string? FormatMac(string? macAddress)
     {
         if (string.IsNullOrEmpty(macAddress))
         {
@@ -31,25 +34,27 @@ public class PacketData
         }
 
         var formattedMac = new StringBuilder();
-        for (int i = 0; i < macAddress.Length; i += 2)
+        // Iterate trough the mac address and append colon after each pair
+        for (var i = 0; i < macAddress.Length; i += 2)
         {
-            formattedMac.Append(macAddress.Substring(i, 2));
-            formattedMac.Append(":");
+            formattedMac.Append(macAddress.AsSpan(i, 2));
+            formattedMac.Append(':');
         }
-
+        
+        // remove trailing colon
         formattedMac.Remove(formattedMac.Length - 1, 1);
+        
         return formattedMac.ToString().ToLower();
     }
 
-
-    public string? SrcMac { get; set; }
-    public string? DstMac { get; set; }
-    public string Protocol { get; set; }
-    public string FrameLength { get; set; }
+    public string? SrcMac { get; } = FormatMac(srcMac);
+    public string? DstMac { get; } = FormatMac(dstMac);
+    public string Protocol { get; } = protocol;
+    public string FrameLength { get; } = frameLength;
     public string? Timestamp { get; set; }
-    public string? SrcIP { get; set; }
-    public string? DstIP { get; set; }
-    public ushort? SrcPort { get; set; }
-    public ushort? DstPort { get; set; }
-    public byte[] ByteOffset { get; set; }
+    public string? SrcIP { get; } = srcIp?.ToString();
+    public string? DstIP { get; } = dstIp?.ToString();
+    public ushort? SrcPort { get; set; } = srcPort;
+    public ushort? DstPort { get; set; } = dstPort;
+    public byte[] ByteOffset { get; } = byteOffset;
 }

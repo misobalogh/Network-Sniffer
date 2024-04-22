@@ -1,8 +1,12 @@
+// Michal Balogh, xbalog06
+// FIT VUT
+// 2024
+
 using NetworkSniffer.Enums;
 
 namespace NetworkSniffer;
 
-
+// Class for handling exiting program with message and exit code
 public static class ExitHandler
 {
     public static void ExitSuccess(string message="", ExitCode code=ExitCode.Success)

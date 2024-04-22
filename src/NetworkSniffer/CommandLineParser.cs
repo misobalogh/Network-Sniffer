@@ -1,9 +1,12 @@
-using System;
+// Michal Balogh, xbalog06
+// FIT VUT
+// 2024
+
 using CommandLine;
-using NetworkSniffer.Enums;
 
 namespace NetworkSniffer;
 
+// Class for handling user specified arguments
 public class CommandLineParser
 {
     public Options Parse(string[] args)
@@ -11,6 +14,8 @@ public class CommandLineParser
         var options = new Options();
         var parser = new Parser(settings =>
         {
+            // turn off default help message, if enabled, no value specified in interface parameter
+            // results in error and printing the help message, which is not desired behaviour
             settings.HelpWriter = null;
             settings.AutoHelp = false;
             settings.AutoVersion = false;
@@ -22,7 +27,8 @@ public class CommandLineParser
             })
             .WithNotParsed(errors =>
             {
-
+                // If error occurs, check if the error is missing value in interface parameter
+                // If so, dont throw exception, rather set the flag, and return
                 foreach (var error in errors)
                 {
                     if (error is MissingValueOptionError && args[0] == "-i" || args[0] == "--interface")
@@ -31,6 +37,7 @@ public class CommandLineParser
                     }
                     ExitHandler.Warn(error.ToString());
                 }
+                // Handle other errors
                 throw new ArgumentException("Invalid arguments");
             });
 
@@ -38,6 +45,8 @@ public class CommandLineParser
     }
 }
 
+
+// All options that can be specified by user
 public class Options
 {
     [Option('i', "interface",

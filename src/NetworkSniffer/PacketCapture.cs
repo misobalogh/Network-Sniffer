@@ -1,8 +1,13 @@
+// Michal Balogh, xbalog06
+// FIT VUT
+// 2024
+
 using NetworkSniffer.Enums;
 using SharpPcap;
 
 namespace NetworkSniffer;
 
+// Class for capturing packets
 public class PacketCapture
 {
     private readonly Options _options;
@@ -12,6 +17,8 @@ public class PacketCapture
     public PacketCapture(Options options)
     {
         _options = options;
+        
+        // argument -i was used without value
         if (string.IsNullOrEmpty(options.Interface))
         {
             ListAllActiveInterfaces();
@@ -27,6 +34,8 @@ public class PacketCapture
             {
                 _device = device;
             }
+            
+            // Handle Ctrl+C
             Console.CancelKeyPress += OnCancelKeyPress;
         }
     }
@@ -47,16 +56,10 @@ public class PacketCapture
         ExitHandler.ExitSuccess();
     }
 
-    private ICaptureDevice? GetDevice(string name)
+    private static ICaptureDevice? GetDevice(string name)
     {
-        foreach (var device in CaptureDeviceList.Instance)
-        {
-            if (device.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-            {
-                return device;
-            }
-        }
-        return null;
+        // Try to find interface specified by user
+        return CaptureDeviceList.Instance.FirstOrDefault(device => device.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
     }
 
     public void StartCapturing()
@@ -65,7 +68,9 @@ public class PacketCapture
 
         _device.Open(DeviceModes.Promiscuous, ReadTimeoutMilliseconds);
 
+        // Create capturing filter with options specified by user
         _device.Filter = Filter.Create(_options);
+        
         _device.Capture();
     }
 
@@ -82,17 +87,19 @@ public class PacketCapture
         var time = GetTime();
         
         var rawPacket = e.GetPacket();
-        
 
         PacketData? parsedPacket = PacketParser.Parse(rawPacket, _options);
+        // Packet does not satisfy the filters
         if (parsedPacket == null)
         {
             return;
         }
 
         parsedPacket.Timestamp = time;
+        // Print wireshark-like packet data to output
         OutputFormater.Output(parsedPacket);
 
+        // If captured packet is equal to set parameter '-n', exit the program 
         if (--_options.PacketCount == 0)
         {
             Console.WriteLine("Packet count reached. Exiting...");
@@ -103,7 +110,9 @@ public class PacketCapture
 
     private string GetTime()
     {
+        // Get time
         DateTimeOffset localTimeWithOffset = DateTimeOffset.Now;
+        // Format it in RFC 3339 format
         string formattedTime = localTimeWithOffset.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz");
         return formattedTime;
     }
