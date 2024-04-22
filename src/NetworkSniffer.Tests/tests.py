@@ -56,7 +56,7 @@ class TestIPKSniffer(unittest.TestCase):
         cls.sniffer_process.stderr.close()
 
     def assertInPayload(self, data, output):
-        output = re.sub(r"\b0x[0-9a-f]+:\s(?:[0-9a-f]{2}\s?)+", "", output, flags=re.MULTILINE)
+        output = re.sub(r"\b0x[0-9a-f]+:\s(?:[0-9a-f]{2}\s+)+", "", output, flags=re.MULTILINE)
         matches = re.findall(r"^(.+?)$", output, re.MULTILINE)
         ascii_section = "".join(matches).replace("\n", "").strip()
         ascii_section = "".join(matches).replace(" ", "").strip()
