@@ -1,7 +1,12 @@
+// Michal Balogh, xbalog06
+// FIT VUT
+// 2024
+
 using System.Text;
 
 namespace NetworkSniffer;
 
+// Class that prints packet data in wireshark-like output to STDOUT
 public static class OutputFormater
 {
     public static void Output(PacketData packetData)
@@ -24,29 +29,53 @@ public static class OutputFormater
         }
         Console.WriteLine();
         
-        for (var i = 0; i < packetData.ByteOffset.Length; i += 16)
-        {
-            // length of current line - either 16 or remaining bytes for last line
-            int lengthCurrentLine = Math.Min(16, packetData.ByteOffset.Length - i);
-            
-            // beginning of the line
-            string byteOffset = $"0x{i:X4}: ".ToLower();
-            
-            string byteOffsetHexa = BitConverter.ToString(packetData.ByteOffset, i, lengthCurrentLine).Replace('-', ' ').ToLower();
-
-            string byteOffsetASCII = Encoding.ASCII.GetString(packetData.ByteOffset, i, lengthCurrentLine);
-            for (int j = 0; j < byteOffsetASCII.Length; j++)
-            {
-                if (byteOffsetASCII[j] < 32 || byteOffsetASCII[j] > 126)
-                {
-                    byteOffsetASCII = byteOffsetASCII.Remove(j, 1).Insert(j, ".");
-                }
-            }
-
-            Console.WriteLine($"{byteOffset,-8}{byteOffsetHexa,-48}{byteOffsetASCII}");
-        }
+        // Hex dump of the packet data
+        PrintHexDump(packetData.ByteOffset);
         
         Console.WriteLine("--------------------------------------------");
         Console.WriteLine();
+    }
+    
+    private static void PrintHexDump(IEnumerable<byte> data)
+    {
+        const int bytesPerLine = 16;
+        int byteCount = 0;
+        var byteOffsetHexa = new StringBuilder();
+        var byteOffsetAscii = new StringBuilder();
+
+        foreach (byte b in data)
+        {
+            // Add byte and space in hex format
+            byteOffsetHexa.Append(b.ToString("X2"));
+            byteOffsetHexa.Append(' ');
+                
+            // Replace non printable characters with '.'
+            byteOffsetAscii.Append(b is >= 32 and <= 126 ? (char)b : '.');
+            
+            byteCount++;
+            
+            // One line finished, print it and start new one
+            if (byteCount % bytesPerLine == 0)
+            {
+                string byteOffset = $"0x{byteCount:X4}: ";
+                Console.WriteLine($"{byteOffset}{byteOffsetHexa,-49}".ToLower() + $"{byteOffsetAscii}");
+                byteOffsetHexa.Clear();
+                byteOffsetAscii.Clear();
+            }
+            // Add extra line after 8 bytes in both hex and ascii part
+            else if (byteCount % 8 == 0)
+            {
+                byteOffsetHexa.Append(' ');
+                byteOffsetAscii.Append(' ');
+            }
+        }
+
+        // Print remaining bytes 
+        if (byteCount > 0)
+        {
+            // Round the byte offset to multiples of 16
+            string byteOffset = $"0x{byteCount + bytesPerLine - byteCount % bytesPerLine:X4}: ";
+            Console.WriteLine($"{byteOffset}{byteOffsetHexa,-49}".ToLower() + $"{byteOffsetAscii}");
+        }
     }
 }
