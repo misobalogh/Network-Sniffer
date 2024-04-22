@@ -1,4 +1,5 @@
 APP_NAME = NetworkSniffer
+EXE = ipk-sniffer
 SRC_DIR = ./src/$(APP_NAME)
 TEST_DIR = ./src/$(APP_NAME).Tests
 BIN = bin
@@ -14,7 +15,7 @@ run: build
 build: 
 	dotnet publish $(SRC_DIR)/$(APP_NAME).csproj  -c Release /p:DebugType=None -o .
 
-test: buildTests
+utest: buildTests
 	dotnet test $(TEST_DIR)/$(APP_NAME).Tests.csproj
 
 buildTests:
@@ -27,9 +28,10 @@ restore:
 	dotnet nuget locals all --clear
 	dotnet restore $(SRC_DIR).sln  --verbosity diagnostic
 
+
 clear:
 	dotnet nuget locals all --clear
 
 clean:
-	dotnet clean $(SRC_DIR)/$(APP_NAME).csproj
-	rm -rf $(APP_NAME)
+	dotnet clean $(SRC_DIR).sln
+	rm -rf $(EXE)

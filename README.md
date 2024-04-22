@@ -7,13 +7,24 @@ filter on specified interface.
 
 ## 1. Table of contents
 - [Implementation of network sniffer](#implementation-of-network-sniffer)
-    * [1. Table of contents](#1-table-of-contents)
-    * [2. How to run it](#2-how-to-run-it)
-        - [Makefile targets:](#makefile-targets)
-    * [3. Basic theory for understanding the program](#3-basic-theory-for-understanding-the-program)
-    * [4. Program structure](#4-program-structure)
-    * [5. Testing](#5-testing)
-    * [6. Bibliography](#6-bibliography)
+  * [IPK - Project 2](#ipk---project-2-)
+  * [1. Table of contents](#1-table-of-contents)
+  * [2. How to run it](#2-how-to-run-it)
+    - [Makefile targets:](#makefile-targets)
+  * [3. Basic theory for understanding the program](#3-basic-theory-for-understanding-the-program)
+  * [4. Program structure](#4-program-structure)
+    - [`CommandLineParser`](#-commandlineparser-)
+    - [`Options`](#-options-)
+    - [`ExitHandler`](#-exithandler-)
+    - [`PacketData`](#-packetdata-)
+    - [`Filter`](#-filter-)
+    - [`PacketParser`](#-packetparser-)
+    - [`OutputParser`](#-outputparser-)
+    - [`PacketCapture`](#-packetcapture-)
+  * [5. Testing](#5-testing)
+    - [Unit tests for CommandLineParser class](#unit-tests-for-commandlineparser-class)
+    - [Python integration tests](#python-integration-tests)
+  * [6. Bibliography](#6-bibliography)
 
 ## 2. How to run it
 The project can be build with prepared [Makefile](Makefile). The default Makefile target will create 
@@ -50,33 +61,33 @@ The structure of the program is shown in the class diagram below:
 
 Here are some key functionalities of each class:
 
-#### CommandLineParser
+#### `CommandLineParser`
 Class for handling user defined arguments. 
 
-#### Options
+#### `Options`
 All possible arguments and flags that can be set by user when running the program.
 
-#### ExitHandler 
+#### `ExitHandler` 
 Class that handles exiting the program with specified exit code and possibly with a message 
 informing user about what is happening.
 
-#### PacketData
+#### `PacketData`
 This class holds data from packet such as type of packet, MAC address, IP address, length of the frame and the payload.
 In case of UDP or TCP, it also holds packet's source and destination port.
 
-#### Filter
+#### `Filter`
 Class that creates filter, that the pcap library understands to, with options 
 specified by user in arguments when running the program. However, NDP and MLD packets 
 are not supported by the library's filter, so these type of packages are handled in the `PacketParser` class.
 
-#### PacketParser
+#### `PacketParser`
 Class for parsing and extracting data from incoming packets. This class also handles specific types of ICMPv6 packets 
 by directly checking their type.  
 
-#### OutputParser
+#### `OutputParser`
 `OutputParser` formats and prints the information about captured packet in wireshark-like output.
 
-#### PacketCapture
+#### `PacketCapture`
 As first, `PacketCapture` gets the interface to sniff on from user defined options. Then it sets the filter created 
 by the `Filter` class and starts capturing packets on the specified interface until the packet count (default 1) set 
 by user is captured or user exits the program by pressing `Ctrl+C`. When a packet is captured, it prints out interesting 
